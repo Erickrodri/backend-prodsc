@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs'
 import { cookies } from 'next/headers'
 
 const JWT_SECRET = process.env.JWT_SECRET || ''
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '8h'
+const JWT_EXPIRES_IN: string | number = process.env.JWT_EXPIRES_IN || '8h'
 
 export interface JWTPayload {
   id_usuario: number
@@ -16,7 +16,7 @@ export interface JWTPayload {
  * Genera un token JWT
  */
 export function generateToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN as string })
 }
 
 /**
