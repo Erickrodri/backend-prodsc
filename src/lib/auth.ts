@@ -1,4 +1,4 @@
-import jwt, { SignOptions } from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import { cookies } from 'next/headers'
 
@@ -17,6 +17,7 @@ export interface JWTPayload {
  */
 export function generateToken(payload: JWTPayload): string {
   return jwt.sign(payload, JWT_SECRET, {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expiresIn: JWT_EXPIRES_IN as any
   })
 }
