@@ -29,7 +29,7 @@ Todos los endpoints (excepto login) requieren autenticación mediante JWT almace
       description: 'Servidor de desarrollo',
     },
     {
-      url: 'https://api.produccionessc.com',
+      url: 'https://backend-prodsc.vercel.app',
       description: 'Servidor de producción',
     },
   ],
