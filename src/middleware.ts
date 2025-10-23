@@ -6,12 +6,42 @@ import { verifyToken } from '@/lib/auth'
 const PUBLIC_ROUTES = ['/api/auth/login', '/api/auth/register', '/api/reference', '/api/docs']
 const PUBLIC_PATHS = ['/docs'] // Rutas de páginas públicas
 
+// Configuración de CORS
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000']
+
+function corsHeaders(origin: string | null) {
+  const headers = new Headers()
+
+  // Verificar si el origen está permitido
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    headers.set('Access-Control-Allow-Origin', origin)
+  }
+
+  headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+  headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  headers.set('Access-Control-Allow-Credentials', 'true')
+
+  return headers
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const origin = request.headers.get('origin')
+
+  // Manejar preflight requests (OPTIONS)
+  if (request.method === 'OPTIONS') {
+    return new NextResponse(null, {
+      status: 204,
+      headers: corsHeaders(origin),
+    })
+  }
 
   // Permitir acceso a rutas públicas
   if (PUBLIC_ROUTES.includes(pathname) || PUBLIC_PATHS.includes(pathname)) {
-    return NextResponse.next()
+    const response = NextResponse.next()
+    const cors = corsHeaders(origin)
+    cors.forEach((value, key) => response.headers.set(key, value))
+    return response
   }
 
   // Verificar si es una ruta de API
@@ -38,6 +68,10 @@ export function middleware(request: NextRequest) {
     // Token válido, permitir acceso
     const response = NextResponse.next()
 
+    // Agregar CORS headers
+    const cors = corsHeaders(origin)
+    cors.forEach((value, key) => response.headers.set(key, value))
+
     // Agregar información del usuario a los headers para uso en las rutas
     response.headers.set('x-user-id', decoded.id_usuario.toString())
     response.headers.set('x-user-uuid', decoded.uuid)
@@ -47,7 +81,10 @@ export function middleware(request: NextRequest) {
     return response
   }
 
-  return NextResponse.next()
+  const response = NextResponse.next()
+  const cors = corsHeaders(origin)
+  cors.forEach((value, key) => response.headers.set(key, value))
+  return response
 }
 
 // Configurar qué rutas deben pasar por el middleware
