@@ -13,7 +13,12 @@ function corsHeaders(origin: string | null) {
   const headers = new Headers()
 
   // Verificar si el origen está permitido
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+  const isAllowed =
+    ALLOWED_ORIGINS.includes('*') || // Permitir todos los orígenes
+    (origin && ALLOWED_ORIGINS.includes(origin)) || // Origen específico en la lista
+    (origin && origin.startsWith('http://localhost:')) // Cualquier localhost en desarrollo
+
+  if (isAllowed && origin) {
     headers.set('Access-Control-Allow-Origin', origin)
   }
 
