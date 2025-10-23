@@ -22,14 +22,14 @@ function corsHeaders(origin: string | null) {
     headers.set('Access-Control-Allow-Origin', origin)
   }
 
-  headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+  headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
   headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   headers.set('Access-Control-Allow-Credentials', 'true')
 
   return headers
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const origin = request.headers.get('origin')
 
@@ -61,8 +61,8 @@ export function middleware(request: NextRequest) {
       )
     }
 
-    // Verificar el token
-    const decoded = verifyToken(token)
+    // Verificar el token (ahora es async)
+    const decoded = await verifyToken(token)
     if (!decoded) {
       return NextResponse.json(
         { error: 'No autorizado - Token inválido o expirado' },

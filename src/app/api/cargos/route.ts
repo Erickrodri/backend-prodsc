@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { createCargoSchema } from '@/lib/validations'
+import { getCurrentUser } from '@/lib/auth'
 import type { ApiResponse, PaginatedResponse } from '@/types'
 
 // GET - Listar todos los cargos con paginación
 export async function GET(request: NextRequest) {
   try {
+    // Verificar autenticación
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, error: 'No autorizado' },
+        { status: 401 }
+      )
+    }
     const { searchParams } = new URL(request.url)
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '10')
@@ -69,6 +78,15 @@ export async function GET(request: NextRequest) {
 // POST - Crear un nuevo cargo
 export async function POST(request: NextRequest) {
   try {
+    // Verificar autenticación
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, error: 'No autorizado' },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
     const validatedData = createCargoSchema.parse(body)
 

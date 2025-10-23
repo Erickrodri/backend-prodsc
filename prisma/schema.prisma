@@ -298,7 +298,7 @@ model mantenimiento {
 model multiplicadortemporada {
   id_multiplicador Int       @id @default(autoincrement())
   id_temporada     Int
-  tipo_operacion   String    @db.VarChar(20)
+  tipo_operacion   Int
   multiplicador    Decimal   @db.Decimal(5, 2)
   fecha_inicio     DateTime  @db.Date
   fecha_fin        DateTime? @db.Date

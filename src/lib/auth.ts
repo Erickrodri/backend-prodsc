@@ -1,9 +1,12 @@
-import jwt from 'jsonwebtoken'
+import { SignJWT, jwtVerify } from 'jose'
 import bcrypt from 'bcryptjs'
 import { cookies } from 'next/headers'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-key'
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '8h'
+
+// Convertir el secret a Uint8Array para jose
+const getSecretKey = () => new TextEncoder().encode(JWT_SECRET)
 
 export interface JWTPayload {
   id_usuario: number
@@ -13,21 +16,30 @@ export interface JWTPayload {
 }
 
 /**
- * Genera un token JWT
+ * Genera un token JWT usando jose (compatible con Edge Runtime)
  */
-export function generateToken(payload: JWTPayload): string {
-  return jwt.sign(payload, JWT_SECRET, {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expiresIn: JWT_EXPIRES_IN as any
-  })
+export async function generateToken(payload: JWTPayload): Promise<string> {
+  try {
+    const token = await new SignJWT({ ...payload })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime(JWT_EXPIRES_IN)
+      .sign(getSecretKey())
+
+    return token
+  } catch (error) {
+    console.error('Error generando token:', error)
+    throw error
+  }
 }
 
 /**
- * Verifica y decodifica un token JWT
+ * Verifica y decodifica un token JWT usando jose (compatible con Edge Runtime)
  */
-export function verifyToken(token: string): JWTPayload | null {
+export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
-    return jwt.verify(token, JWT_SECRET) as JWTPayload
+    const { payload } = await jwtVerify(token, getSecretKey())
+    return payload as JWTPayload
   } catch (error) {
     console.error('Error verificando token:', error)
     return null
@@ -63,7 +75,7 @@ export async function getTokenFromCookies(): Promise<string | null> {
 export async function getCurrentUser(): Promise<JWTPayload | null> {
   const token = await getTokenFromCookies()
   if (!token) return null
-  return verifyToken(token)
+  return await verifyToken(token)
 }
 
 /**

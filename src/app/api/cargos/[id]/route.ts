@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { updateCargoSchema } from '@/lib/validations'
+import { getCurrentUser } from '@/lib/auth'
 import type { ApiResponse } from '@/types'
 
 // GET - Obtener un cargo por ID
@@ -9,6 +10,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Verificar autenticación
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, error: 'No autorizado' },
+        { status: 401 }
+      )
+    }
     const { id } = await params
     const cargoId = parseInt(id)
 
@@ -59,12 +68,21 @@ export async function GET(
   }
 }
 
-// PATCH - Actualizar un cargo
+// PATCH - Actualizar un cargo parcialmente
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Verificar autenticación
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, error: 'No autorizado' },
+        { status: 401 }
+      )
+    }
+
     const { id } = await params
     const cargoId = parseInt(id)
 
@@ -141,6 +159,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Verificar autenticación
+    const user = await getCurrentUser()
+    if (!user) {
+      return NextResponse.json<ApiResponse>(
+        { success: false, error: 'No autorizado' },
+        { status: 401 }
+      )
+    }
+
     const { id } = await params
     const cargoId = parseInt(id)
 

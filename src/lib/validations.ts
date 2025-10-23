@@ -177,6 +177,29 @@ export const createCargoSchema = z.object({
 export const updateCargoSchema = createCargoSchema.partial()
 
 // ============================================
+// TEMPORADA SCHEMAS
+// ============================================
+
+export const updateMesTemporadaSchema = z.object({
+  anio: z.number().int().min(2000).max(2100),
+  mes: z.number().int().min(1).max(12),
+  id_temporada: z.number().int().positive(),
+})
+
+export const updateMesesLoteSchema = z.object({
+  anio: z.number().int().min(2000).max(2100),
+  actualizaciones: z
+    .array(
+      z.object({
+        mes: z.number().int().min(1).max(12),
+        id_temporada: z.number().int().positive(),
+      })
+    )
+    .min(1)
+    .max(12),
+})
+
+// ============================================
 // TIPOS INFERIDOS
 // ============================================
 
@@ -196,3 +219,5 @@ export type CreateVentaInput = z.infer<typeof createVentaSchema>
 export type UpdateVentaInput = z.infer<typeof updateVentaSchema>
 export type CreateCargoInput = z.infer<typeof createCargoSchema>
 export type UpdateCargoInput = z.infer<typeof updateCargoSchema>
+export type UpdateMesTemporadaInput = z.infer<typeof updateMesTemporadaSchema>
+export type UpdateMesesLoteInput = z.infer<typeof updateMesesLoteSchema>
