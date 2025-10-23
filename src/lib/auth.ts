@@ -39,7 +39,23 @@ export async function generateToken(payload: JWTPayload): Promise<string> {
 export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
     const { payload } = await jwtVerify(token, getSecretKey())
-    return payload as JWTPayload
+
+    // Validar que el payload tiene las propiedades requeridas
+    if (
+      typeof payload.id_usuario === 'number' &&
+      typeof payload.uuid === 'string' &&
+      typeof payload.id_personal === 'number' &&
+      typeof payload.username === 'string'
+    ) {
+      return {
+        id_usuario: payload.id_usuario,
+        uuid: payload.uuid,
+        id_personal: payload.id_personal,
+        username: payload.username,
+      }
+    }
+
+    return null
   } catch (error) {
     console.error('Error verificando token:', error)
     return null
